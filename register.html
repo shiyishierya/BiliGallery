@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - BiliGallery</title>
+    <style>
+        /* 复用部分样式，保持统一 */
+        body {
+            margin: 0; padding: 0;
+            background-color: #f4f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .reg-card {
+            background: white;
+            width: 480px;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .reg-header { font-size: 24px; color: #333; margin-bottom: 30px; font-weight: normal; }
+        
+        /* Tab 切换 */
+        .reg-tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 25px; }
+        .tab-item {
+            flex: 1; padding: 10px; cursor: pointer; color: #717171;
+            transition: 0.2s; position: relative;
+        }
+        .tab-item.active { color: #00aeec; }
+        .tab-item.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: #00aeec;
+        }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-field {
+            width: 100%; height: 42px; border: 1px solid #ddd; border-radius: 4px;
+            padding: 0 10px; box-sizing: border-box; outline: none; transition: 0.2s;
+        }
+        .input-field:focus { border-color: #00aeec; }
+        
+        /* 验证码行 */
+        .code-row { display: flex; gap: 10px; }
+        #captchaCanvas { border: 1px solid #eee; border-radius: 4px; cursor: pointer; }
+
+        .btn-reg {
+            width: 100%; height: 42px; background: #00aeec; color: white;
+            border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px;
+        }
+        .btn-reg:hover { background: #00a1d6; }
+        
+        .footer-link { margin-top: 15px; font-size: 12px; color: #999; }
+        .footer-link a { color: #00aeec; text-decoration: none; }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="reg-card">
+        <div class="reg-header">创建账号</div>
+        
+        <div class="reg-tabs">
+            <div class="tab-item active" onclick="switchTab('phone')">手机号注册</div>
+            <div class="tab-item" onclick="switchTab('email')">邮箱注册</div>
+        </div>
+
+        <div id="phoneForm">
+            <div class="input-group">
+                <input type="text" id="phoneInput" class="input-field" placeholder="请输入手机号">
+            </div>
+        </div>
+
+        <div id="emailForm" class="hidden">
+            <div class="input-group">
+                <input type="text" id="emailInput" class="input-field" placeholder="请输入邮箱地址 (例如: user@example.com)">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="passInput" class="input-field" placeholder="设置密码 (6-16位)">
+        </div>
+
+        <div class="input-group code-row">
+            <input type="text" id="codeInput" class="input-field" placeholder="验证码">
+            <canvas id="captchaCanvas" width="120" height="42"></canvas>
+        </div>
+
+        <button class="btn-reg" id="regBtn">立即注册</button>
+        
+        <div class="footer-link">
+            已有账号？ <a href="index.html">直接登录</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createCode, drawCaptcha, validatePhone, validateEmail, registerUser } from './js/modules/utils.js';
+
+        let currentCode = '';
+        let currentTab = 'phone'; // 默认手机
+
+        // 初始化验证码
+        function refreshCaptcha() {
+            currentCode = createCode();
+            drawCaptcha('captchaCanvas', currentCode);
+        }
+        window.addEventListener('load', refreshCaptcha);
+        document.getElementById('captchaCanvas').addEventListener('click', refreshCaptcha);
+
+        // Tab 切换逻辑 (暴露给全局)
+        window.switchTab = function(type) {
+            currentTab = type;
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if(type === 'phone') {
+                document.getElementById('phoneForm').classList.remove('hidden');
+                document.getElementById('emailForm').classList.add('hidden');
+            } else {
+                document.getElementById('phoneForm').classList.add('hidden');
+                document.getElementById('emailForm').classList.remove('hidden');
+            }
+        };
+
+        document.getElementById('regBtn').addEventListener('click', () => {
+            const pass = document.getElementById('passInput').value;
+            const code = document.getElementById('codeInput').value;
+            
+            // 1. 验证验证码
+            if(code.toUpperCase() !== currentCode) {
+                alert('验证码错误'); refreshCaptcha(); return;
+            }
+            if(!pass || pass.length < 6) return alert('密码太短了');
+
+            // 2. 根据 Tab 验证账号格式
+            let account = '';
+            if(currentTab === 'phone') {
+                account = document.getElementById('phoneInput').value.trim();
+                if(!validatePhone(account)) return alert('请输入正确的手机号');
+            } else {
+                account = document.getElementById('emailInput').value.trim();
+                if(!validateEmail(account)) return alert('请输入正确的邮箱地址');
+            }
+
+            // 3. 注册
+            const res = registerUser(account, pass, currentTab);
+            alert(res.msg);
+            if(res.success) location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

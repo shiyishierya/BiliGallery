@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - BiliGallery</title>
+    <style>
+        /* CSS 保持不变 (仿B站风格) */
+        body {
+            margin: 0; padding: 0;
+            background-image: url('https://s1.hdslb.com/bfs/static/jinkela/long/images/login-bg.png'); 
+            background-color: #f4f5f7; background-size: cover; background-position: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        .auth-card {
+            background: white; width: 820px; height: 420px; display: flex;
+            border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; overflow: hidden;
+        }
+        .auth-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+            background: linear-gradient(90deg, #00aeec, #fb7299);
+        }
+        .auth-left {
+            width: 400px; border-right: 1px solid #ddd; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; background: #fff;
+        }
+        .qr-title { font-size: 18px; color: #212121; margin-bottom: 20px; font-weight: 500; }
+        .qr-box {
+            width: 160px; height: 160px; border: 1px solid #eee; border-radius: 4px; padding: 10px;
+            background: #fff; position: relative;
+        }
+        .qr-img {
+            width: 100%; height: 100%;
+            background-image: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BiliGallery'); 
+            background-size: cover;
+        }
+        .qr-tip { margin-top: 15px; font-size: 12px; color: #999; }
+        .qr-link { color: #00aeec; cursor: pointer; text-decoration: none; }
+
+        .auth-right { flex: 1; padding: 40px 50px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        .auth-title {
+            font-size: 18px; color: #212121; margin-bottom: 30px; text-align: center;
+            display: flex; justify-content: center; gap: 20px;
+        }
+        .tab-btn { cursor: pointer; padding-bottom: 5px; color: #505050; transition: 0.3s; }
+        .tab-btn.active { color: #00aeec; border-bottom: 2px solid #00aeec; font-weight: bold; }
+
+        .input-group { margin-bottom: 20px; position: relative; display: flex; gap: 10px; }
+        .input-field {
+            width: 100%; height: 40px; border: 1px solid #e7e7e7; border-radius: 4px; padding: 0 10px;
+            box-sizing: border-box; outline: none; transition: 0.2s; font-size: 14px;
+        }
+        .input-field:focus { border-color: #00aeec; }
+        
+        .btn-code {
+            width: 120px; height: 40px; background: #fff; border: 1px solid #e7e7e7; color: #505050;
+            border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap;
+        }
+        .btn-code:hover { color: #00aeec; border-color: #00aeec; }
+        .btn-code:disabled { color: #999; cursor: not-allowed; border-color: #eee; }
+
+        .btn-login {
+            width: 100%; height: 40px; background: #00aeec; color: white; border: none;
+            border-radius: 4px; font-size: 14px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-login:hover { background: #00a1d6; }
+
+        .auth-footer { margin-top: 15px; display: flex; justify-content: space-between; font-size: 12px; }
+        .link { color: #00aeec; text-decoration: none; cursor: pointer; }
+        .hidden { display: none; }
+
+        /* 🔥 新增：游客访问链接 */
+        .guest-link {
+            position: absolute; top: 10px; right: 15px; font-size: 12px; color: #999; text-decoration: none;
+            transition: 0.2s; cursor: pointer;
+        }
+        .guest-link:hover { color: #fb7299; }
+
+        /* 忘记密码弹窗 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            display: none; justify-content: center; align-items: center; z-index: 999;
+        }
+        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 360px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; }
+        .close-btn { float: right; cursor: pointer; font-size: 20px; color: #999; margin-top: -5px; }
+        .btn-reset { width: 100%; height: 40px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="auth-left">
+            <div class="qr-title">扫描二维码登录</div>
+            <div class="qr-box"><div class="qr-img"></div></div>
+            <div class="qr-tip">请使用 <span class="qr-link">客户端</span> 扫码登录</div>
+        </div>
+        
+        <div class="auth-right">
+            <a href="gallery.html" class="guest-link">游客访问 &gt;</a>
+
+            <div class="auth-title">
+                <span class="tab-btn active" onclick="switchLoginTab('pwd')">密码登录</span>
+                <span class="tab-btn" onclick="switchLoginTab('sms')">短信登录</span>
+            </div>
+            
+            <div id="pwdBox">
+                <div class="input-group">
+                    <input type="text" id="account" class="input-field" placeholder="手机号 / 邮箱">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" class="input-field" placeholder="请输入密码">
+                </div>
+            </div>
+
+            <div id="smsBox" class="hidden">
+                <div class="input-group">
+                    <input type="text" id="smsPhone" class="input-field" placeholder="请输入手机号">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="smsCode" class="input-field" placeholder="请输入验证码">
+                    <button id="getCodeBtn" class="btn-code">获取验证码</button>
+                </div>
+            </div>
+            
+            <button id="loginBtn" class="btn-login">登录</button>
+            
+            <div class="auth-footer">
+                <a href="register.html" class="link">注册账号</a>
+                <span class="link" onclick="openForgotModal()">忘记密码？</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal-box">
+            <span class="close-btn" onclick="closeForgotModal()">×</span>
+            <div class="modal-header">重置密码</div>
+            <div class="input-group">
+                <input type="text" id="forgotAccount" class="input-field" placeholder="请输入注册的手机号/邮箱">
+            </div>
+            <div class="input-group">
+                <input type="text" id="forgotCode" class="input-field" placeholder="验证码">
+                <button id="forgotGetCodeBtn" class="btn-code">获取验证码</button>
+            </div>
+            <div class="input-group">
+                <input type="password" id="newResetPass" class="input-field" placeholder="新密码 (6位以上)">
+            </div>
+            <button id="resetBtn" class="btn-reset">确认重置</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { loginUser, findUser, resetPassword } from './js/modules/utils.js';
+
+        let loginType = 'pwd'; 
+        let currentSmsCode = ''; 
+        let currentForgotCode = '';
+
+        window.switchLoginTab = function(type) {
+            loginType = type;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if(type === 'pwd') {
+                document.getElementById('pwdBox').classList.remove('hidden');
+                document.getElementById('smsBox').classList.add('hidden');
+            } else {
+                document.getElementById('pwdBox').classList.add('hidden');
+                document.getElementById('smsBox').classList.remove('hidden');
+            }
+        };
+
+        function sendMockCode(btnId, accountId, codeVarName) {
+            const btn = document.getElementById(btnId);
+            const account = document.getElementById(accountId).value.trim();
+            if(!account) return alert('请输入账号');
+            const user = findUser(account);
+            if(!user) return alert('该账号未注册');
+
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            if(codeVarName === 'sms') currentSmsCode = code;
+            if(codeVarName === 'forgot') currentForgotCode = code;
+
+            alert(`【BiliGallery】您的验证码是：${code}，请在5分钟内输入。`);
+
+            let left = 60;
+            btn.disabled = true;
+            btn.innerText = `${left}s`;
+            const timer = setInterval(() => {
+                left--;
+                btn.innerText = `${left}s`;
+                if(left <= 0) { clearInterval(timer); btn.disabled = false; btn.innerText = '获取验证码'; }
+            }, 1000);
+        }
+
+        document.getElementById('getCodeBtn').addEventListener('click', () => sendMockCode('getCodeBtn', 'smsPhone', 'sms'));
+        document.getElementById('forgotGetCodeBtn').addEventListener('click', () => sendMockCode('forgotGetCodeBtn', 'forgotAccount', 'forgot'));
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            let account, password;
+            if(loginType === 'pwd') {
+                account = document.getElementById('account').value.trim();
+                password = document.getElementById('password').value.trim();
+                if(!account || !password) return alert('请输入完整信息');
+                if(loginUser(account, password)) window.location.href = 'gallery.html';
+                else alert('账号或密码错误');
+            } else {
+                account = document.getElementById('smsPhone').value.trim();
+                const code = document.getElementById('smsCode').value.trim();
+                if(!account || !code) return alert('请输入手机号和验证码');
+                if(code !== currentSmsCode) return alert('验证码错误');
+                if(loginUser(account, null)) window.location.href = 'gallery.html';
+                else alert('登录失败，请检查账号');
+            }
+        });
+
+        window.openForgotModal = () => document.getElementById('forgotModal').style.display = 'flex';
+        window.closeForgotModal = () => document.getElementById('forgotModal').style.display = 'none';
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            const acc = document.getElementById('forgotAccount').value.trim();
+            const code = document.getElementById('forgotCode').value.trim();
+            const newPass = document.getElementById('newResetPass').value.trim();
+            if(!acc || !code || !newPass) return alert('请填写完整');
+            if(code !== currentForgotCode) return alert('验证码错误');
+            if(newPass.length < 6) return alert('新密码太短');
+            const res = resetPassword(acc, newPass);
+            alert(res.msg);
+            if(res.success) closeForgotModal();
+        });
+        
+        document.addEventListener('keydown', (e) => { if(e.key === 'Enter') document.getElementById('loginBtn').click(); });
+    </script>
+</body>
+</html>
