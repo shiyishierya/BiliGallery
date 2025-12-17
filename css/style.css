@@ -1,0 +1,186 @@
+/* css/style.css - 全局磨砂玻璃风格升级版 */
+
+:root {
+    /* 🔥 核心变量：色彩与磨砂参数 */
+    --primary: #00aeec;
+    --primary-gradient: linear-gradient(135deg, #00aeec, #0077ff); /* 主色渐变 */
+    --secondary-gradient: linear-gradient(135deg, #fb7299, #ff4d79); /* 次要色渐变(如B站粉) */
+    
+    --text-dark: #18191c;
+    --text-gray: #61666d;
+    
+    /* 🧊 磨砂玻璃核心参数 */
+    /* 背景色：高透的白色，带一点点色彩倾向 */
+    --glass-bg: rgba(255, 255, 255, 0.45); 
+    /* 模糊度：越大越朦胧 */
+    --glass-blur: blur(16px); 
+    /* 边框：极细的半透明白边，增加精致感 */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+    /* 阴影：柔和的彩色光晕投影 */
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    --radius-lg: 20px;
+    --radius-md: 12px;
+}
+
+/* --- 1. 全局背景升级：绚丽色彩 --- */
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-dark);
+    /* 🔥 这里是关键：设置一个绚丽的渐变背景，固定住不随滚动条移动 */
+    background-image: 
+        radial-gradient(at 40% 20%, hsla(28,100%,74%,1) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
+        radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, hsla(242,100%,70%,1) 0px, transparent 50%),
+        radial-gradient(at 0% 0%, hsla(343,100%,76%,1) 0px, transparent 50%);
+    background-color: #e3f2fd; /* 兜底色 */
+    background-attachment: fixed; /* 背景固定 */
+    background-size: cover;
+    min-height: 100vh;
+}
+
+/* 通用磨砂玻璃类（给未来元素使用） */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-lg);
+}
+
+/* --- 2. 组件磨砂化改造 --- */
+
+/* 导航栏 */
+.navbar {
+    /* 替换掉原来的纯白背景 */
+    background: rgba(255, 255, 255, 0.65) !important; /* 稍微不透明一点保证文字可读性 */
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: var(--glass-border);
+    box-shadow: var(--glass-shadow) !important;
+    /* 其他原有样式保持不变 */
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 40px; height: 64px; margin-bottom: 20px; position: sticky; top: 0; z-index: 100;
+}
+
+/* 搜索框 & 输入框透明化 */
+#searchInput, 
+.input-group input,
+.input-group select,
+.input-group textarea {
+    background: rgba(255, 255, 255, 0.5) !important; /* 半透明白底 */
+    border: 1px solid rgba(255,255,255,0.6) !important;
+    backdrop-filter: blur(5px);
+    transition: 0.3s;
+    color: var(--text-dark) !important;
+}
+#searchInput:focus, .input-group input:focus {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 15px rgba(0, 174, 236, 0.2);
+}
+
+/* 筛选面板 (首页) */
+.filter-panel {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: var(--radius-lg) !important;
+}
+
+/* 图片卡片 (首页 & 个人中心) */
+.b-card, .img-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-md) !important;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s !important;
+}
+.b-card:hover, .img-card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 15px 35px rgba(0, 174, 236, 0.25) !important; /* 悬浮时更强的彩色光晕 */
+}
+.b-info { padding: 12px; }
+
+/* 登录/注册卡片 */
+.auth-container {
+    display: flex; justify-content: center; align-items: center; min-height: 90vh;
+}
+.auth-card {
+    background: rgba(255, 255, 255, 0.55); /* 比其他卡片稍不透明 */
+    backdrop-filter: blur(20px); /* 更强的模糊 */
+    -webkit-backdrop-filter: blur(20px);
+    border: var(--glass-border);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    padding: 40px 30px;
+    border-radius: 24px;
+    width: 400px;
+    text-align: center;
+}
+
+/* 个人中心布局 */
+.sidebar, .content-area {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: var(--radius-lg) !important;
+}
+.sidebar { border-right: none; } /* 移除旧边框 */
+
+/* 按钮升级：渐变色 */
+.btn, .action-btn {
+    background-image: var(--primary-gradient) !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(0, 174, 236, 0.3);
+    transition: 0.3s;
+}
+.btn:hover, .action-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 174, 236, 0.5);
+}
+/* 特殊颜色按钮 */
+.btn-delete, #logoutBtn { background-image: linear-gradient(135deg, #ff4d4d, #f73859) !important; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3); }
+.btn-ghost { background-image: linear-gradient(135deg, #8e44ad, #c0392b) !important; }
+.btn-manage-cmt { background-image: linear-gradient(135deg, #f39c12, #d35400) !important; }
+
+/* 筛选标签 */
+.filter-tag {
+    background: rgba(255,255,255,0.3); /* 平时半透明 */
+    border: 1px solid rgba(255,255,255,0.5);
+    backdrop-filter: blur(5px);
+}
+.filter-tag.active {
+    background-image: var(--primary-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0, 174, 236, 0.3);
+}
+
+/* 后台表格 */
+.admin-table th { background: rgba(0, 174, 236, 0.1) !important; }
+.admin-table tr:hover { background: rgba(255,255,255,0.3) !important; }
+
+/* 弹窗 */
+.modal-box, .modal-main {
+    background: rgba(255, 255, 255, 0.85) !important; /* 弹窗不透明度高一点 */
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2) !important;
+    border-radius: 24px !important;
+}
+.modal-img-container { border-radius: 16px; overflow: hidden; }
